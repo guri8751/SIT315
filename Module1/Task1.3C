@@ -1,0 +1,53 @@
+// C++ code
+//
+int const sensor = 2;
+int const led = 13;
+int const sensor2 = 3;
+
+volatile int sensor_state;
+volatile int sensor_state2;
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(sensor, INPUT);
+  pinMode(sensor2, INPUT);
+  pinMode(led, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(sensor), toggle, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(sensor2), toggle2, CHANGE);
+  
+}
+
+void loop(){
+  delay(500);  
+}
+
+
+void toggle(){
+  sensor_state = digitalRead(sensor);
+  digitalWrite(led, sensor_state);
+  if(sensor_state == 1)
+  {
+    Serial.println("Motion in Sensor 1!");
+  }
+  else
+  {
+    Serial.println("No Motion!");
+  }
+      
+}
+
+void toggle2(){
+  sensor_state2 = digitalRead(sensor2);
+  digitalWrite(led, sensor_state2);
+  if(sensor_state2 == 1)
+  {
+    Serial.println("Motion in Sensor 2!");
+  }
+  else
+  {
+    Serial.println("No Motion!");
+  }
+      
+}
+

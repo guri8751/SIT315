@@ -1,0 +1,56 @@
+
+const int t1_load=0;
+const int t1_comp=42555;
+const int led_pin=PB4;
+
+void setup()
+{
+  
+  PCICR |= 0b00000011;	
+  
+  PCMSK2 |= 0b11111111;
+  
+  PCMSK0 |= 0b00000110;
+  
+  DDRB |=0b00001000;
+  PORTB |= 0b00001000;
+  
+  DDRD |=0b00000001;
+  PORTD |= 0b00000001;
+  
+  DDRB|=(1<<led_pin);
+  
+  TCCR1A=0;
+
+  TCCR1B|=(1<<CS12);
+  TCCR1B&=~(1<<CS11);
+  TCCR1B|=(1<<CS10);
+
+
+  
+  TCNT1=t1_load;
+  OCR1A=t1_comp;
+  
+  TIMSK1=(1<<OCIE1A);
+  sei();
+}
+void loop()
+{
+	
+}
+
+ISR(PCINT2_vect){
+  PORTD ^=0b00000001;
+}
+
+ISR(PCINT0_vect){
+  PORTB ^=0b00001000;
+}
+
+
+
+ISR(TIMER1_COMPA_vect){
+  TCNT1=t1_load;
+  PORTB^=(1<<led_pin);
+  
+}

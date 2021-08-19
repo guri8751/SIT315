@@ -1,56 +1,58 @@
 
-const int t1_load=0;
-const int t1_comp=42555;
-const int led_pin=PB4;
-
+volatile byte high1,high2,high3 = 0;
 void setup()
 {
+  Serial.begin(9600);
   
-  PCICR |= 0b00000011;	
+  pinMode(2, INPUT);
+  pinMode(3, INPUT);
+  pinMode(4, INPUT);
+  pinMode(12,OUTPUT);
+  pinMode(11,OUTPUT);
+  pinMode(10,OUTPUT);
+  pinMode(13,OUTPUT);
   
-  PCMSK2 |= 0b11111111;
   
-  PCMSK0 |= 0b00000110;
+  PCICR |= 0b00000100;	
   
-  DDRB |=0b00001000;
-  PORTB |= 0b00001000;
+  PCMSK2 |= 0b000011100;
   
-  DDRD |=0b00000001;
-  PORTD |= 0b00000001;
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
   
-  DDRB|=(1<<led_pin);
+  //LED turn on every 4 seconds = 0.25Hz
+  //0.25Hz = (16000000/((62499+1)*1024))
+  OCR1A = 62499;
   
-  TCCR1A=0;
-
-  TCCR1B|=(1<<CS12);
-  TCCR1B&=~(1<<CS11);
-  TCCR1B|=(1<<CS10);
-
-
+  TCCR1B |= (1<<CS12) | (1<<CS10);
   
-  TCNT1=t1_load;
-  OCR1A=t1_comp;
+  TIMSK1 |= (1<<OCIE1A);
   
-  TIMSK1=(1<<OCIE1A);
-  sei();
+  TCCR1B |= (1<<WGM12);
+  
+ 
 }
 void loop()
 {
+  digitalWrite(11,high1);
+  digitalWrite(12,high2);
+  digitalWrite(10,high3);
 	
 }
 
 ISR(PCINT2_vect){
-  PORTD ^=0b00000001;
-}
-
-ISR(PCINT0_vect){
-  PORTB ^=0b00001000;
-}
-
-
-
-ISR(TIMER1_COMPA_vect){
-  TCNT1=t1_load;
-  PORTB^=(1<<led_pin);
+  high1 = PIND & B00001000;
+  high2 = PIND & B00010000;
+  high3 = PIND & B00000100;
+  Serial.println("Motion Detected");
   
 }
+
+ISR(TIMER1_COMPA_vect){
+  Serial.println("Timer interrupt");
+  digitalWrite(13,digitalRead(13)^1);
+  
+}
+  
+
